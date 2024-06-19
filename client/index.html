@@ -12,13 +12,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            height: 160vh;
             margin: 0;
             padding: 0;
         }
 
         .container {
-            width: 500px;
+            width: 90%;
+            height: 90%;
             background-color: #fff;
             border-radius: 8px;
             padding: 20px;
@@ -26,7 +27,7 @@
         }
 
         #output {
-            height: 200px;
+            height: 150px;
             overflow-y: scroll;
             border: 1px solid #ccc;
             padding: 10px;
@@ -53,8 +54,16 @@
             font-size: 14px;
         }
 
+        #chart-container {
+            flex: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         #chart {
-            margin-top: 20px;
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
@@ -91,11 +100,13 @@
 
         function encrypt(text) {
             const ciphertext = CryptoJS.AES.encrypt(text, 'secret key 123').toString();
-            return ciphertext;      
+            return text;      
         }
 
         function decrypt(text) {
-            
+            const bytes = CryptoJS.AES.decrypt(text, 'secret key 123');
+            const originalText = bytes.toString(CryptoJS.enc.Utf8);
+            return text;
         }
 
         function sendMessage() {
@@ -103,7 +114,7 @@
             if (message !== '') {
                 const binaryMessage = textToBinary(message);
                 const encryptedMessage = encrypt(binaryMessage);
-                socket.emit('sendMessage', encryptedMessage);
+                socket.emit('sendMessage', binaryMessage);
                 messageInput.value = '';
                 outputMessage(`Enviado: ${binaryMessage}`);
             }
@@ -121,10 +132,10 @@
             const textMessage = binaryToText(decryptedMessage);
             outputMessage(`Recebido: ${decryptedMessage}`);
             outputMessage(`Recebido: ${textMessage}`);
-            updateChart(decryptedMessage);
+            updateChart(message);
         });
 
-        function updateChart(binaryMessage) {
+        function pseudoTernary(binaryMessage) {
             const data = [];
             let polarity = 1;
             binaryMessage.split('').forEach(bit => {
@@ -132,7 +143,9 @@
                 polarity = -polarity;
                 data.push(value);
             });
-
+            return data;
+        }
+        function updateChart(data){
             if (chart) {
                 chart.destroy();
             }
