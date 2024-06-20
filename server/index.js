@@ -13,8 +13,7 @@ io.on('connection', (socket) => {
 
     socket.on('sendMessage', (message) => {
         console.log('Mensagem recebida do cliente:', message);
-        // Supondo que a mensagem já esteja em binário e criptografada
-        io.emit('receiveMessage', message);
+        socket.broadcast.emit('receiveMessage', message);
     });
 
     socket.on('disconnect', () => {
