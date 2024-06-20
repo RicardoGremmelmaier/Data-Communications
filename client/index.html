@@ -100,23 +100,33 @@
 
         function encrypt(text) {
             const ciphertext = CryptoJS.AES.encrypt(text, 'secret key 123').toString();
-            return text;      
+            return ciphertext;      
         }
 
         function decrypt(text) {
             const bytes = CryptoJS.AES.decrypt(text, 'secret key 123');
             const originalText = bytes.toString(CryptoJS.enc.Utf8);
-            return text;
+            return originalText;
         }
 
         function sendMessage() {
             let message = messageInput.value.trim();
             if (message !== '') {
-                const binaryMessage = textToBinary(message);
-                const encryptedMessage = encrypt(binaryMessage);
-                socket.emit('sendMessage', binaryMessage);
+                outputMessage(`Mensagem inicial: ${message}`);//Mensagem inicial
+                
+                const encryptedMessage = encrypt(message);//Mensagem criptografada
+                outputMessage(`Mensagem criptografada: ${encryptedMessage}`);
+                
+                const binaryMessage = textToBinary(message);//Mensagem criptografada em binário
+                outputMessage(`Mensagem em binário: ${binaryMessage}`);
+                
+                const pseudoTernaryMessage = pseudoTernary(binaryMessage);//Mensagem criptografada aplicada o algoritmo
+                outputMessage(`Enviado: ${pseudoTernaryMessage.toString()}`);
+                
+                socket.emit('sendMessage', pseudoTernaryMessage);
                 messageInput.value = '';
-                outputMessage(`Enviado: ${binaryMessage}`);
+
+                updateChart(pseudoTernaryMessage);//Faz o gráfico
             }
         }
 
@@ -128,23 +138,42 @@
         }
 
         socket.on('receiveMessage', (message) => {
-            const decryptedMessage = decrypt(message);
-            const textMessage = binaryToText(decryptedMessage);
-            outputMessage(`Recebido: ${decryptedMessage}`);
-            outputMessage(`Recebido: ${textMessage}`);
             updateChart(message);
+            outputMessage(`Recebido: ${message}`);
+
+            const reversePseudoTernaryMessage = reversePseudoTernary(message);
+            outputMessage(`Revertido o algoritmo: ${reversePseudoTernaryMessage}`);
+
+            const textMessage = binaryToText(reversePseudoTernaryMessage);
+            outputMessage(`Mensagem criptografada: ${textMessage}`);            
+            
+            const decryptedMessage = decrypt(textMessage);
+            outputMessage(`Mensagem final: ${decryptedMessage}`);
         });
 
         function pseudoTernary(binaryMessage) {
             const data = [];
             let polarity = 1;
             binaryMessage.split('').forEach(bit => {
-                const value = bit === '1' ? 0 : polarity;
+                const value = bit === '1' ? 0 : bit === '0'? polarity : '';
                 polarity = -polarity;
-                data.push(value);
+                if (value !== ''){data.push(value);}
             });
             return data;
         }
+
+        function reversePseudoTernary(data){
+            let binary = "";
+            let count = 0;
+            data.forEach(bit => {
+                const value = bit === 0 ? '1' : '0'
+                binary += value;
+                count ++;
+                if (count === 8){binary += ' '; count = 0;};
+            });
+            return binary;
+        }
+
         function updateChart(data){
             if (chart) {
                 chart.destroy();
