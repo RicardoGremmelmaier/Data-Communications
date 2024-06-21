@@ -79,7 +79,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const socket = io('http://172.27.236.14:3000'); 
+        const socket = io('http://192.168.0.139:3000'); 
 
         const output = document.getElementById('output');
         const messageInput = document.getElementById('message');
@@ -117,7 +117,7 @@
                 const encryptedMessage = encrypt(message);//Mensagem criptografada
                 outputMessage(`Mensagem criptografada: ${encryptedMessage}`);
                 
-                const binaryMessage = textToBinary(message);//Mensagem criptografada em binário
+                const binaryMessage = textToBinary(encryptedMessage);//Mensagem criptografada em binário
                 outputMessage(`Mensagem em binário: ${binaryMessage}`);
                 
                 const pseudoTernaryMessage = pseudoTernary(binaryMessage);//Mensagem criptografada aplicada o algoritmo
@@ -171,7 +171,7 @@
                 count ++;
                 if (count === 8){binary += ' '; count = 0;};
             });
-            return binary;
+            return binary.trim();
         }
 
         function updateChart(data){
